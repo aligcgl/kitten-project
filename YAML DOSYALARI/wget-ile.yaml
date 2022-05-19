@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+  EC2ApacheInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0022f774911c1d690
+      InstanceType: t2.micro
+      Tags:
+        - Key: Name
+          Value: Kitten_Project
+        - Key: Name
+          Value: My_Apache
+      UserData: 
+        Fn::Base64:
+          !Sub |
+            #! /bin/bash
+            sudo yum update -y
+            sudo yum install -y httpd
+            systemctl start httpd
+            chmod 777 /var/www/html
+            cd /var/www/html
+            # create a custom index.html file
+            wget https://raw.githubusercontent.com/OdabasiMehmet/Kittens-Project/master/index.html
+            wget https://raw.githubusercontent.com/OdabasiMehmet/Kittens-Project/master/cat2.jpg
+            wget https://raw.githubusercontent.com/OdabasiMehmet/Kittens-Project/master/cat1.jpg
+            wget https://raw.githubusercontent.com/OdabasiMehmet/Kittens-Project/master/cat0.jpg
+            # start apache server
+            systemctl restart httpd
+            systemctl enable httpd /var/www/html/index.html
+      SecurityGroups:
+        - !Ref ApacheSecurityGroup
+      KeyName: firstkey
+
+  ApacheSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "Apache Security Group"
+      GroupDescription: Apacche security Group
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          CidrIp: "0.0.0.0/0"
+          FromPort: 22
+          ToPort: 22
+        - IpProtocol: "tcp"
+          CidrIp: "0.0.0.0/0"
+          FromPort: 80
+          ToPort: 80
+        
